@@ -56,7 +56,7 @@
 
 /* External variables --------------------------------------------------------*/
 extern UART_HandleTypeDef huart2;
-extern volatile uint8_t timerFlag;
+extern volatile int timerFlag;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */

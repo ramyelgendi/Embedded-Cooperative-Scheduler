@@ -8,8 +8,6 @@ typedef void (*func)(void);
 // Structs
 struct Task { int priority, delay; func task;};
 struct Queue { int currentSize, maxSize; struct Task* tasksList; };
-static const struct Task default_task = {INT_MAX, INT_MAX, NULL};
-
 // Functions
 struct Queue* createQueue(int);
 int isQueueFull(struct Queue*);
@@ -18,6 +16,8 @@ void Enqueue(struct Queue*, int , int , func);
 void heapify(struct Queue*, int);
 struct Task Dequeue(struct Queue*);
 int compare(struct Task, struct Task);
+
+static const struct Task default_task = {INT_MAX, INT_MAX, NULL};
 
 struct Queue* createQueue(int maxSize)
 {
@@ -40,7 +40,7 @@ int isQueuempty(struct Queue* queue)
 {
     return (queue->currentSize == 0);
 }
-void bubbleSortForPriority(struct Queue* queue)
+void bubbleSortPriority(struct Queue* queue)
 {
     for (int i = 0; i < queue->currentSize; i++)
         for (int j =i+1; j < queue->currentSize; j++)
@@ -51,7 +51,7 @@ void bubbleSortForPriority(struct Queue* queue)
                 queue->tasksList[j] = temp;
             }
 }
-void bubbleSortForDelay(struct Queue* queue)
+void bubbleSortDelay(struct Queue* queue)
 {
     for (int i = 0; i < queue->currentSize; i++)
         for (int j =i+1; j < queue->currentSize; j++)
@@ -75,10 +75,10 @@ void Enqueue(struct Queue* queue, int priority, int delay, func task)
     queue->tasksList[queue->currentSize] = t;
     queue->currentSize++;
 		if(delay==0)
-			bubbleSortForPriority(queue);
+			bubbleSortPriority(queue);
 		else
-			bubbleSortForDelay(queue);
-
+			bubbleSortDelay(queue);
+			
 }
 
 // Helper: less than operator for tasks (treated as pair<delay, prio>)
@@ -113,7 +113,7 @@ struct Task Dequeue(struct Queue* q)
 {
     struct Task ret;
 
-    if (isQueueFull(q))
+    if (isQueuempty(q))
         return default_task;
 
     // Take task reference and replace its reference with the lasr task in the queue
