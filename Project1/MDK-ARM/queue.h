@@ -40,11 +40,22 @@ int isQueuempty(struct Queue* queue)
 {
     return (queue->currentSize == 0);
 }
-void bubbleSort(struct Queue* queue)
+void bubbleSortForPriority(struct Queue* queue)
 {
     for (int i = 0; i < queue->currentSize; i++)
         for (int j =i+1; j < queue->currentSize; j++)
             if (queue->tasksList[i].priority > queue->tasksList[j].priority)
+            {
+                struct Task temp = queue->tasksList[i];
+                queue->tasksList[i] = queue->tasksList[j];
+                queue->tasksList[j] = temp;
+            }
+}
+void bubbleSortForDelay(struct Queue* queue)
+{
+    for (int i = 0; i < queue->currentSize; i++)
+        for (int j =i+1; j < queue->currentSize; j++)
+            if (queue->tasksList[i].delay > queue->tasksList[j].delay)
             {
                 struct Task temp = queue->tasksList[i];
                 queue->tasksList[i] = queue->tasksList[j];
@@ -63,7 +74,11 @@ void Enqueue(struct Queue* queue, int priority, int delay, func task)
 
     queue->tasksList[queue->currentSize] = t;
     queue->currentSize++;
-    bubbleSort(queue);
+		if(delay==0)
+			bubbleSortForPriority(queue);
+		else
+			bubbleSortForDelay(queue);
+
 }
 
 // Helper: less than operator for tasks (treated as pair<delay, prio>)

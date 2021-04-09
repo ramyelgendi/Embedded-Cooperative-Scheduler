@@ -74,34 +74,51 @@ void QueTask(func task,int priority){
 }
 
 void Dispatch() {
-    int size = readyQueue->currentSize;
-   // for(int i=0;i<size && !isQueuempty(readyQueue);i++)
+	
+		struct Task temp_task;		 
+	 // If delayed queue is not empty, decrement the delay, if delay is 0 put in ready queue.
+	 if(delayedQueue->currentSize > 0) {
+		 int temp_size = delayedQueue->currentSize;
+	  for(int i=0;i<temp_size;i++) {
+			if(delayedQueue->tasksList[i].delay>0)
+				delayedQueue->tasksList[i].delay--;
+			
+			if(delayedQueue->tasksList[i].delay==0) {
+				temp_task = Dequeue(delayedQueue);
+				Enqueue(readyQueue,temp_task.priority,temp_task.delay,temp_task.task);
+				
+			}
+		}
+		
+	}
+	 // ReadyQueue
+	  int size = readyQueue->currentSize;
 		if(size>0)
 		{
-	
-        struct Task runningTask = Dequeue(readyQueue);
-        //printf("Index %d, priority: %d\n",i,temp.priority);
+        runningTask = Dequeue(readyQueue);
         runningTask.task();
     }
 }
-
 void ReRunMe(int delay) {
     runningTask.delay=delay;
-    if(delay==0)
+    if(runningTask.delay==0)
         QueTask(runningTask.task, runningTask.priority);
     else
         Enqueue(delayedQueue,runningTask.priority,runningTask.delay,runningTask.task);
 }
 void TaskA(){
-  //  printf("TaskA is running! \n");
-  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
-   //  HAL_Delay(1000);
-     ReRunMe(0);
+	   HAL_UART_Transmit(&huart2,(uint8_t *)"TaskA\r\n", sizeof("TaskA\r\n"),500);
+	   HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_3);
+     HAL_Delay(1000);
+     ReRunMe(5);
 }
 void TaskB(){
-   // printf("TaskB is running! \n");
- HAL_UART_Transmit(&huart2,(uint8_t *)"Test", sizeof("Test"),500);
-    ReRunMe(0);
+	
+	 //HAL_UART_Transmit(&huart2,(uint8_t *)HAL_GetTick, 1,500);
+		 HAL_UART_Transmit(&huart2,(uint8_t *)"TaskB\r\n", sizeof("TaskA\r\n"),500);
+
+	  HAL_Delay(1000);
+	 ReRunMe(10);
 }
 
 /**
@@ -111,7 +128,6 @@ void TaskB(){
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -119,6 +135,7 @@ int main(void)
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
+	
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -133,9 +150,9 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
-Init();
-QueTask(TaskA,5);
-QueTask(TaskB,6);
+	Init();
+	QueTask(TaskA,4);
+	QueTask(TaskB,1);
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -145,10 +162,8 @@ QueTask(TaskB,6);
   while (1)
   {
     /* USER CODE END WHILE */
-//    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
-// HAL_Delay(200);
-// HAL_UART_Transmit(&huart2,(uint8_t *)"Test", sizeof("Test"),500);
-Dispatch();
+		Dispatch();
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
