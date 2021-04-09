@@ -394,11 +394,6 @@
           <GroupName>Application/User/Core</GroupName>
           <Files>
             <File>
-              <FileName>queue.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\queue.h</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/main.c</FilePath>
@@ -412,6 +407,11 @@
               <FileName>stm32l4xx_hal_msp.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32l4xx_hal_msp.c</FilePath>
+            </File>
+            <File>
+              <FileName>queue.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Core\Src\queue.h</FilePath>
             </File>
           </Files>
         </Group>
