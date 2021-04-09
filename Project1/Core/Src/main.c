@@ -76,7 +76,8 @@ void QueTask(func task,int priority){
 
 void Dispatch() {
 	
-		struct Task temp_task;		 
+		struct Task temp_task;	
+ int size = readyQueue->currentSize;	
 	 // If delayed queue is not empty, decrement the delay, if delay is 0 put in ready queue.
 	 if(delayedQueue->currentSize > 0) {
 		 int temp_size = delayedQueue->currentSize;
@@ -93,12 +94,14 @@ void Dispatch() {
 		
 	}
 	 // ReadyQueue
-	  int size = readyQueue->currentSize;
 		if(size>0)
 		{
         runningTask = Dequeue(readyQueue);
         runningTask.task();
     }
+		else
+			HAL_UART_Transmit(&huart2,(uint8_t *)"Idle\r\n", sizeof("Idle\r\n"),500);
+		
 }
 void ReRunMe(int delay) {
     runningTask.delay=delay;
@@ -111,7 +114,7 @@ void TaskA(){
 	   HAL_UART_Transmit(&huart2,(uint8_t *)"TaskA\r\n", sizeof("TaskA\r\n"),500);
 	   HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_3);
      //HAL_Delay(1000);
-     ReRunMe(5);
+ //    ReRunMe(5);
 }
 void TaskB(){
 	
@@ -119,7 +122,7 @@ void TaskB(){
 		 HAL_UART_Transmit(&huart2,(uint8_t *)"TaskB\r\n", sizeof("TaskA\r\n"),500);
 
 	  //HAL_Delay(1000);
-	 ReRunMe(10);
+	// ReRunMe(10);
 }
 
 /**
@@ -164,8 +167,9 @@ int main(void)
   {
     /* USER CODE END WHILE */
 //		if(timerFlag == 1000){
-	HAL_Delay(500);
+//	HAL_Delay(500);
 			Dispatch();
+		//HAL_UART_Transmit(&huart2,(uint8_t *)"Idle\r\n", sizeof("Idle\r\n"),500);
 			timerFlag=0;
 //		}
 
