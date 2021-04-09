@@ -53,17 +53,13 @@ static void MX_USART2_UART_Init(void);
 static struct Queue* readyQueue;
 static struct Queue* delayedQueue;
 struct Task runningTask;
-void printIdle(){
-	
-		 HAL_UART_Transmit(&huart2,(uint8_t *)"Idle\r\n", sizeof("Idle\r\n"),500);
-}
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-volatile int timerFlag=0;
+volatile uint16_t timerFlag=0;
 
 /* USER CODE END 0 */
 void Init(){
@@ -80,7 +76,8 @@ void QueTask(func task,int priority){
 
 void Dispatch() {
 	
-		struct Task temp_task;		 
+		struct Task temp_task;	
+ int size = readyQueue->currentSize;	
 	 // If delayed queue is not empty, decrement the delay, if delay is 0 put in ready queue.
 	 if(delayedQueue->currentSize > 0) {
 		 int temp_size = delayedQueue->currentSize;
@@ -93,17 +90,17 @@ void Dispatch() {
 				Enqueue(readyQueue,temp_task.priority,temp_task.delay,temp_task.task);
 				
 			}
-		}
-		
+		}		
 	}
 	 // ReadyQueue
-	  int size = readyQueue->currentSize;
 		if(size>0)
 		{
         runningTask = Dequeue(readyQueue);
         runningTask.task();
-    } else
-				printIdle();
+    }
+		else
+			HAL_UART_Transmit(&huart2,(uint8_t *)"Idle\r\n", sizeof("Idle\r\n"),500);
+		
 }
 void ReRunMe(int delay) {
     runningTask.delay=delay;
@@ -113,23 +110,43 @@ void ReRunMe(int delay) {
         Enqueue(delayedQueue,runningTask.priority,runningTask.delay,runningTask.task);
 }
 void TaskA(){
-	   HAL_UART_Transmit(&huart2,(uint8_t *)"TaskA\r\n", sizeof("TaskA\r\n"),500);
-     //ReRunMe(4);
+	   HAL_UART_Transmit(&huart2,(uint8_t *)"Task A\r\n", sizeof("Task A\r\n"),500);
+	   HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_3);
+     //HAL_Delay(1000);
+ //    ReRunMe(5);
 }
 void TaskB(){
-	 HAL_UART_Transmit(&huart2,(uint8_t *)"TaskB\r\n", sizeof("TaskB\r\n"),500);
-	 //ReRunMe(5);
+	
+	 //HAL_UART_Transmit(&huart2,(uint8_t *)HAL_GetTick, 1,500);
+		 HAL_UART_Transmit(&huart2,(uint8_t *)"Task B\r\n", sizeof("Task B\r\n"),500);
+
+	  //HAL_Delay(1000);
+	// ReRunMe(10);
 }
 void TaskC(){
-	   HAL_UART_Transmit(&huart2,(uint8_t *)"TaskC\r\n", sizeof("TaskC\r\n"),500);
-     //ReRunMe(4);
+	
+	 //HAL_UART_Transmit(&huart2,(uint8_t *)HAL_GetTick, 1,500);
+		 HAL_UART_Transmit(&huart2,(uint8_t *)"Task C\r\n", sizeof("Task C\r\n"),500);
+
+	  //HAL_Delay(1000);
+	// ReRunMe(10);
 }
 void TaskD(){
-	 HAL_UART_Transmit(&huart2,(uint8_t *)"TaskD\r\n", sizeof("TaskD\r\n"),500);
-	 //ReRunMe(5);
+	
+	 //HAL_UART_Transmit(&huart2,(uint8_t *)HAL_GetTick, 1,500);
+		 HAL_UART_Transmit(&huart2,(uint8_t *)"Task D\r\n", sizeof("Task D\r\n"),500);
+
+	  //HAL_Delay(1000);
+	// ReRunMe(10);
 }
+void TaskE(){
+	
+	 //HAL_UART_Transmit(&huart2,(uint8_t *)HAL_GetTick, 1,500);
+		 HAL_UART_Transmit(&huart2,(uint8_t *)"Task E\r\n", sizeof("Task E\r\n"),500);
 
-
+	  //HAL_Delay(1000);
+	// ReRunMe(10);
+}
 /**
   * @brief  The application entry point.
   * @retval int
@@ -160,11 +177,11 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
 	Init();
-	QueTask(TaskA,1);
-	QueTask(TaskB,2);
+	QueTask(TaskA,5);
+	QueTask(TaskB,4);
 	QueTask(TaskC,3);
-	QueTask(TaskD,4);
-
+	QueTask(TaskD,2);
+	QueTask(TaskE,1);
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -174,10 +191,11 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-			if(timerFlag >= 1000){
+//		if(timerFlag == 1000){
+//	HAL_Delay(500);
 			Dispatch();
-			timerFlag=0;
-			}
+		//	timerFlag=0;
+//		}
 
     /* USER CODE BEGIN 3 */
   }
