@@ -59,6 +59,7 @@ struct Task runningTask;
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+volatile uint16_t timerFlag=0;
 
 /* USER CODE END 0 */
 void Init(){
@@ -109,7 +110,7 @@ void ReRunMe(int delay) {
 void TaskA(){
 	   HAL_UART_Transmit(&huart2,(uint8_t *)"TaskA\r\n", sizeof("TaskA\r\n"),500);
 	   HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_3);
-     HAL_Delay(1000);
+     //HAL_Delay(1000);
      ReRunMe(5);
 }
 void TaskB(){
@@ -117,7 +118,7 @@ void TaskB(){
 	 //HAL_UART_Transmit(&huart2,(uint8_t *)HAL_GetTick, 1,500);
 		 HAL_UART_Transmit(&huart2,(uint8_t *)"TaskB\r\n", sizeof("TaskA\r\n"),500);
 
-	  HAL_Delay(1000);
+	  //HAL_Delay(1000);
 	 ReRunMe(10);
 }
 
@@ -162,7 +163,11 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-		Dispatch();
+//		if(timerFlag == 1000){
+	HAL_Delay(500);
+			Dispatch();
+			timerFlag=0;
+//		}
 
     /* USER CODE BEGIN 3 */
   }
