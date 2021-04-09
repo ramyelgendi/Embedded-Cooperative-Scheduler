@@ -19,24 +19,19 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "queue.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "queue.c"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-#define MAX_SIZE 100
 
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -45,115 +40,78 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-struct Queue {
-    int front, rear, size;
-    unsigned capacity;
-    int* array;
-	
-};
- 
-struct Task {
-	int priority;
-	void *fn;
-	
-};
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_USART2_UART_Init(void);
+static struct Queue* readyQueue;
+static struct Queue* delayedQueue;
+struct Task runningTask;
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-struct Queue* createQueue(unsigned capacity)
-{
-    struct Queue* queue = (struct Queue*)malloc(
-        sizeof(struct Queue));
-    queue->capacity = capacity;
-    queue->front = queue->size = 0;
- 
-    // This is important, see the enqueue
-    queue->rear = capacity - 1;
-    queue->array = (int*)malloc(
-        queue->capacity * sizeof(int));
-    return queue;
-}
- 
-// Queue is full when size becomes
-// equal to the capacity
-int isFull(struct Queue* queue)
-{
-    return (queue->size == queue->capacity);
-}
- 
-// Queue is empty when size is 0
-int isEmpty(struct Queue* queue)
-{
-    return (queue->size == 0);
-}
- 
-// Function to add an item to the queue.
-// It changes rear and size
-void enqueue(struct Queue* queue, int item)
-{
-    if (isFull(queue))
-        return;
-    queue->rear = (queue->rear + 1)
-                  % queue->capacity;
-    queue->array[queue->rear] = item;
-    queue->size = queue->size + 1;
-    printf("%d enqueued to queue\n", item);
-}
- 
-// Function to remove an item from queue.
-// It changes front and size
-int dequeue(struct Queue* queue)
-{
-    if (isEmpty(queue))
-        return INT_MIN;
-    int item = queue->array[queue->front];
-    queue->front = (queue->front + 1)
-                   % queue->capacity;
-    queue->size = queue->size - 1;
-    return item;
-}
- 
-// Function to get front of queue
-int front(struct Queue* queue)
-{
-    if (isEmpty(queue))
-        return INT_MIN;
-    return queue->array[queue->front];
-}
- 
-// Function to get rear of queue
-int rear(struct Queue* queue)
-{
-    if (isEmpty(queue))
-        return INT_MIN;
-    return queue->array[queue->rear];
-}
+
 /* USER CODE END 0 */
+void Init(){
+    readyQueue = createQueue(1000);
+    delayedQueue = createQueue(1000);
+}
+
+void QueTask(func task,int priority){
+    if(priority >= 1 && priority <= 8 )
+    {
+        Enqueue(readyQueue, priority, 0, task);
+    }
+}
+
+void Dispatch() {
+    int size = readyQueue->currentSize;
+   // for(int i=0;i<size && !isQueuempty(readyQueue);i++)
+		if(size>0)
+		{
+	
+        struct Task runningTask = Dequeue(readyQueue);
+        //printf("Index %d, priority: %d\n",i,temp.priority);
+        runningTask.task();
+    }
+}
+
+void ReRunMe(int delay) {
+    runningTask.delay=delay;
+    if(delay==0)
+        QueTask(runningTask.task, runningTask.priority);
+    else
+        Enqueue(delayedQueue,runningTask.priority,runningTask.delay,runningTask.task);
+}
+void TaskA(){
+  //  printf("TaskA is running! \n");
+  HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+   //  HAL_Delay(1000);
+     ReRunMe(0);
+}
+void TaskB(){
+   // printf("TaskB is running! \n");
+ HAL_UART_Transmit(&huart2,(uint8_t *)"Test", sizeof("Test"),500);
+    ReRunMe(0);
+}
 
 /**
   * @brief  The application entry point.
   * @retval int
   */
-typedef void (*function)(void);
-
 int main(void)
 {
   /* USER CODE BEGIN 1 */
 
-	struct Task test;
-	function x;
-	
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -174,6 +132,10 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART2_UART_Init();
+Init();
+QueTask(TaskA,5);
+QueTask(TaskB,6);
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -183,7 +145,10 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+//    HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_3);
+// HAL_Delay(200);
+// HAL_UART_Transmit(&huart2,(uint8_t *)"Test", sizeof("Test"),500);
+Dispatch();
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -197,6 +162,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Configure LSE Drive Capability
   */
@@ -221,10 +187,16 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
+  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }
@@ -240,16 +212,63 @@ void SystemClock_Config(void)
 }
 
 /**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 9600;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PB3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
