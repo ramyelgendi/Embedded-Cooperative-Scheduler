@@ -46,8 +46,6 @@ UART_HandleTypeDef huart2;
 struct Queue readyQueue;
 struct Queue delayedQueue;
 int flag = 0;
-uint16_t timerFlag=0;
-uint16_t timer=0;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -67,49 +65,30 @@ struct Queue{int currentSize,maxSize;struct Task tasksList[10]; };
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 /* USER CODE END 0 */
-
-uint8_t Num1buffer [2], Num2buffer  [2];
-uint8_t out[] = {0,0,'.',0,0,'\r','\n'};
-//float temp=22.25;
-uint8_t temp=100;
-float CurrTemp= 0.0;
-uint8_t hexToAscii(uint8_t n)//4-bit hex value converted to an ascii character
-{
- if (n>=0 && n<=9)
-n = n + '0';
- else
-n = n - 10 + 'A';
- return n;
-}
 void Init()   // initialize the scheduler data structures
 {
-   readyQueue.currentSize=0;
-   delayedQueue.currentSize=0;
-   for (int i = 0; i<10;i++)
-{
-     delayedQueue.tasksList[i].delay=1000;
-}
-
-Num1buffer[0] = 0x11; //register address
-Num2buffer[0] = 0x12; //register address
-HAL_I2C_Master_Transmit(&hi2c1, 0xD0, Num1buffer, 2, 10);
-HAL_I2C_Master_Transmit(&hi2c1, 0xD0, Num2buffer, 2, 10);
+	readyQueue.currentSize=0;
+	delayedQueue.currentSize=0;
+	   for (int i = 0; i<10;i++)
+	{
+	     delayedQueue.tasksList[i].delay=1000;
+	}
 }
 
 int ReadyQueueIsEmpty()
 {
 if(readyQueue.currentSize==0)
-return 1;
+	return 1;
 else
-return 0;
+	return 0;
 }
 
 int DelayQueueIsEmpty()
 {
 if(delayedQueue.currentSize==0)
-return 1;
+	return 1;
 else
-return 0;
+	return 0;
 }
 void bubbleSortPriority()
 {
@@ -143,23 +122,23 @@ void bubbleSortDelay()
 }
 void Enqueue(int priority,int delay,func task)
 {
-if(priority>=1 && priority<=8)
-{
-if(delay==0)
-{
-readyQueue.tasksList[readyQueue.currentSize].task=task;
-readyQueue.tasksList[readyQueue.currentSize].priority=priority;
-readyQueue.currentSize++;
-bubbleSortPriority();
-}
-else{
-delayedQueue.tasksList[delayedQueue.currentSize].task = task;
-delayedQueue.tasksList[delayedQueue.currentSize].delay = delay-1;
-delayedQueue.tasksList[delayedQueue.currentSize].priority=readyQueue.tasksList[0].priority;
-delayedQueue.currentSize++;
-bubbleSortDelay();
-}
-}
+	if(priority>=1 && priority<=8)
+	{
+	   if(delay==0)
+	{
+		readyQueue.tasksList[readyQueue.currentSize].task=task;
+		readyQueue.tasksList[readyQueue.currentSize].priority=priority;
+		readyQueue.currentSize++;
+		bubbleSortPriority();
+	}
+	else{
+		delayedQueue.tasksList[delayedQueue.currentSize].task = task;
+		delayedQueue.tasksList[delayedQueue.currentSize].delay = delay-1;
+		delayedQueue.tasksList[delayedQueue.currentSize].priority=readyQueue.tasksList[0].priority;
+		delayedQueue.currentSize++;
+		bubbleSortDelay();
+	    }
+	}
 }
 void QueTask(func task,int priority)
 {
@@ -204,10 +183,10 @@ void Dispatch()
         DequeueDelay();
     }
     if(!ReadyQueueIsEmpty())
-{
-      readyQueue.tasksList[0].task();
-			Dequeue();
-}
+	{
+      	readyQueue.tasksList[0].task();
+	Dequeue();
+	}
 		
 		if(flag==1)
 		{
@@ -219,95 +198,26 @@ void Dispatch()
 void TaskB(void)
 {
 int i =0, j=0;
-	
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
-		for(i=0;i<500000;i++){}
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
-		for(i=0;i<500000;i++){}
-			ReRunMe(5);
-}
-
-void TaskA(void)
-{
-    //do something
-	//uint8_t temp=27.00;
-	 //CurrTemp=((out[0]-'0')*10)+(out[1]-'0')+((out[3]-'0')/10)+((out[4]-'0')/100);
-	//CurrTemp=Num1buffer[1];
-	//char buffer[4];
-	// HAL_UART_Transmit(&huart2,(uint8_t*)CurrTemp,sizeof(CurrTemp),200);
-	//sprintf(buffer,"%d",CurrTemp);
-	//if(!FirstRun)
-	//{
-	if(CurrTemp>=temp)
-	{
-		
-	 //HAL_GPIO_TogglePin(GPIOB,GPIO_PIN_3);
-		QueTask(TaskB,5);
-	  HAL_UART_Transmit(&huart2,(uint8_t*)"The Threshold Temp is Exceeded \r\n",sizeof("The Threshold Temp is Exceeded \r\n"),200);
-	// HAL_Delay(500);
-	}
-//}
-	//FirstRun=1;
- // Rerun again after 5 ticks
-    ReRunMe(5);
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
+for(i=0;i<500000;i++){}
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+for(i=0;i<500000;i++){}
+ReRunMe(5);
 }
 
 void TaskC(void)
 {
    //do something
-   //HAL_UART_Transmit(&huart2,(uint8_t *)"Task 3\r\n", sizeof("Task B\r\n"),500);
-	HAL_UART_Transmit(&huart2,(uint8_t *)"Task 3\r\n", sizeof("Task D\r\n"),500);
+   HAL_UART_Transmit(&huart2,(uint8_t *)"Task 3\r\n", sizeof("Task D\r\n"),500);
+   // Rerun again 
    ReRunMe(100);
 }
 void TaskD()
 {
   //do something
   HAL_UART_Transmit(&huart2,(uint8_t *)"Task 4\r\n", sizeof("Task D\r\n"),500);
-// Rerun again after 10 ticks
+// Rerun again 
   ReRunMe(3);
-}
-void TaskE(){
- //send seconds register address 00h to read from
- HAL_I2C_Master_Transmit(&hi2c1, 0xD0, Num1buffer, 1, 10);
- //read data of register 00h to secbuffer[1]
- HAL_I2C_Master_Receive(&hi2c1, 0xD1, Num1buffer+1, 1, 10);
-
- //send seconds register address 00h to read from
- HAL_I2C_Master_Transmit(&hi2c1, 0xD0, Num2buffer, 1, 10);
- //read data of register 00h to secbuffer[1]
- HAL_I2C_Master_Receive(&hi2c1, 0xD1, Num2buffer+1, 1, 10);
-CurrTemp=Num1buffer[1];
-out[1]=hexToAscii(Num1buffer[1] %10);
-Num1buffer[1]=Num1buffer[1] /10;
-out[0]=hexToAscii(Num1buffer[1]%10);
-
-	if(Num2buffer[1] == 64) {
-out[3] = hexToAscii(0x2);
-out[4] = hexToAscii(0x5);
-CurrTemp=CurrTemp+0.25;
-}
-else if(Num2buffer[1] == 128) {
-out[3] = hexToAscii(0x5);
-out[4] = hexToAscii(0x0);
-CurrTemp=CurrTemp+0.5;
-}
-else if(Num2buffer[1] == 192) {
-out[3] = hexToAscii(0x7);
-out[4] = hexToAscii(0x5);
-CurrTemp=CurrTemp+0.75;
-}else{
-out[3] = hexToAscii(0x0);
-out[4] = hexToAscii(0x0);
-}
-	
-//out[4]=hexToAscii(Num2buffer[1] %10);
-//Num2buffer[1]=Num2buffer[1] /10;
-//out[3]=hexToAscii(Num2buffer[1]%10);
-
-//// transmit temperature to UART
- HAL_UART_Transmit(&huart2,out, sizeof(out), 10);
-// HAL_Delay(1000);
-ReRunMe(20);
 }
 /**
   * @brief  The application entry point.
@@ -338,8 +248,6 @@ int main(void)
 MX_GPIO_Init();
 MX_I2C1_Init();
 MX_USART2_UART_Init();
-
-
 Init();    // initialize the scheduler data structures
 //QueTask(TaskE,3);
 //QueTask(TaskA,4);
@@ -354,8 +262,7 @@ Init();    // initialize the scheduler data structures
   /* USER CODE BEGIN WHILE */
 while (1)
   {
-	//	HAL_UART_Transmit(&huart2,&temp,sizeof(temp),200);
-Dispatch();
+	Dispatch();
   }
 }
 /**
