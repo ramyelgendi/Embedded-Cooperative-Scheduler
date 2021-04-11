@@ -44,7 +44,7 @@ D1 -> Connected to receive over UART1
 ![alt text](https://i.imgur.com/nBvBalM.jpg)
 
 ## Application 2: Parking Sensor
-There are two tasks. The first one is responsible for reading the distance between the sensor and the object. The other task is responsible for toggling the buzzer based on the distance that it received from the first task. The toggling task has a higher priority since it needs to interrupt the reading task which is frequently working.
+The application uses the same schudler as the first one hence we have the same functions the only difference is the tasks. The application has two tasks; the first one is responsible for reading the distance between the sensor and the object. This happens by pulling the pull the TRIG pin HIGH then wait and pull the TRING pin LOW and transformed the distance measured into cm. The other task is responsible for toggling the buzzer based on the distance that it received from the first task. The frequency of the toggling increases when the distance increases to notify the user that the sensor got closer to an object. The toggling task has a higher priority since it needs to interrupt the reading task which is frequently working.
 - Demo
 https://user-images.githubusercontent.com/57822979/114319517-2bb60d80-9b12-11eb-8402-c67122c418d5.mp4
 
