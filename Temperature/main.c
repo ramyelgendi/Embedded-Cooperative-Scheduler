@@ -147,6 +147,8 @@ void bubbleSortDelay()
 }
 void Enqueue(int priority,int delay,func task)
 {
+if(priority>=1 && priority<=8)
+{
 if(delay==0)
 {
 readyQueue.tasksList[readyQueue.currentSize].task=task;
@@ -160,6 +162,7 @@ delayedQueue.tasksList[delayedQueue.currentSize].delay = delay;
 delayedQueue.tasksList[delayedQueue.currentSize].priority=readyQueue.tasksList[0].priority;
 delayedQueue.currentSize++;
 bubbleSortDelay();
+}
 }
 }
 void QueTask(func task,int priority)
