@@ -190,7 +190,7 @@ void Dispatch()
 		
 		if(flag==1)
 		{
-			HAL_UART_Transmit(&huart2,(uint8_t *)"Ideal\r\n", sizeof("Ideal\r\n"),500);
+			HAL_UART_Transmit(&huart2,(uint8_t *)"Idle\r\n", sizeof("Idle\r\n"),500);
 			flag=0;
 		}
 }
