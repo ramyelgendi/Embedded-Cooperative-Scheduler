@@ -26,7 +26,7 @@ This is a similar function that implements the simplest sorting algorithm that w
 - Typedef func: void function pointer.
 
 # Unit Tests
-## Schedular Demo 1
+## Scheduler Demo 1
 Demo consists of 5 tasks. They do not use ReRunMe function for testing the readyQueue. Tasks are being defined as follows:
 
 ![WhatsApp Image 2021-04-12 at 12 00 03 AM](https://user-images.githubusercontent.com/68485300/114322906-0382da80-9b23-11eb-9da1-a86086a5059a.jpeg)
@@ -35,27 +35,27 @@ Demo consists of 5 tasks. They do not use ReRunMe function for testing the ready
 ###  Output
 ![TestCase3](https://user-images.githubusercontent.com/68485300/114321920-cb2ccd80-9b1d-11eb-9ac5-ab83b5119ebd.jpeg)
 
-## Schedular Demo 2
+## Scheduler Demo 2
 Demo consists of 1 task, having ReRunMe(3), meaning that it has delay of (3). Tasks defined as:
 
 ![WhatsApp Image 2021-04-12 at 12 11 35 AM](https://user-images.githubusercontent.com/68485300/114323122-15b14880-9b24-11eb-8c2f-e9b6518805c1.jpeg)
 ### Output
 ![TestCase](https://user-images.githubusercontent.com/68485300/114321802-fd89fb00-9b1c-11eb-932e-9b5fa8bf25a3.jpeg)
-## Schedular Demo 3
+## Scheduler Demo 3
 Demo consists of two tasks, having different priorities and different delays. Tasks are defined as the following:
 
 ![WhatsApp Image 2021-04-12 at 12 12 21 AM](https://user-images.githubusercontent.com/68485300/114323137-31b4ea00-9b24-11eb-9b8d-86fb8da58f04.jpeg)
 ### Output
 ![TestCase1](https://user-images.githubusercontent.com/68485300/114321805-ffec5500-9b1c-11eb-965f-77dd1d7ea874.jpeg)
 
-## Schedular Demo 4
+## Scheduler Demo 4
 Demo consists of 2 tasks, having same delay and same priority. We defined the tasks as follows:
 
 ![Third](https://user-images.githubusercontent.com/68485300/114322923-1dbcb880-9b23-11eb-81e4-0f6b58084cbd.jpeg)
 ### Output
 ![TestCase2](https://user-images.githubusercontent.com/68485300/114321807-01b61880-9b1d-11eb-95a7-0660bcb91a3a.jpeg)
 
-## Schedular Demo 5
+## Scheduler Demo 5
 Demo consists of 4 tasks, with different delays and priorities, showing the full functionality of the scheduler.
 ### Expected Output
 ![Last](https://user-images.githubusercontent.com/68485300/114322928-2a411100-9b23-11eb-970a-104de99abb3f.jpeg)
